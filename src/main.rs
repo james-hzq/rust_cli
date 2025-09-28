@@ -2,7 +2,7 @@ fn main() {
     println!("Hello, Rust!");
 }
 
-#[cfg(test)]
+#[cfg(test)]s
 mod tests {
     #[test]
     fn it_works() {
