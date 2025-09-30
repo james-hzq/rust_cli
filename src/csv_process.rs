@@ -2,6 +2,7 @@ use std::fs;
 use anyhow::Result;
 use csv::Reader;
 use serde::{Deserialize, Serialize};
+use serde_json;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
