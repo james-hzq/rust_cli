@@ -1,5 +1,6 @@
 name: build
 
+# 触发条件：当向 main 分支推送代码、创建以 v 开头的 tag，或者向 main 发起 PR 时触发
 on:
   push:
     branches:
@@ -10,44 +11,59 @@ on:
     branches:
       - main
 
+# 设置权限，允许写入仓库内容（用于发布 release）
 permissions:
   contents: write
 
 jobs:
   build-rust:
+    # 使用策略矩阵定义平台环境（当前只使用 ubuntu-latest）
     strategy:
       matrix:
         platform: [ubuntu-latest]
+    # 指定运行平台
     runs-on: ${{ matrix.platform }}
+    # 定义执行步骤
     steps:
+      # 检出代码并递归拉取子模块
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: recursive
+      # 安装稳定版 Rust 工具链，并附带 llvm-tools-preview 组件
       - name: Install Rust
         run: rustup toolchain install stable --component llvm-tools-preview
+      # 安装 cargo-llvm-cov 工具（用于代码覆盖率分析）
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
+      # 步骤4: 安装 cargo-nextest（更快的测试运行器）
       - name: install nextest
         uses: taiki-e/install-action@nextest
+      # 缓存 Rust 构建依赖项以加速后续构建
       - uses: Swatinem/rust-cache@v2
+      # 检查代码格式是否符合规范
       - name: Check code format
         run: cargo fmt -- --check
+      # 检查项目是否存在编译错误
       - name: Check the package for errors
         run: cargo check --all
+      # 对源码进行 lint 检查，启用所有目标和特性，并将警告视为错误
       - name: Lint rust sources
         run: cargo clippy --all-targets --all-features --tests --benches -- -D warnings
+      # 运行所有功能的测试用例
       - name: Execute rust tests
         run: cargo nextest run --all-features
+      #（仅限于 tag 推送）生成变更日志
       - name: Generate a changelog
         uses: orhun/git-cliff-action@v4.6.0
         id: git-cliff
         if: startsWith(github.ref, 'refs/tags/')
         with:
           config: cliff.toml
-          args: --verbose
+          args: -vv --latest --strip header
         env:
           OUTPUT: CHANGES.md
+      # 仅限于 tag 推送）根据变更日志创建 GitHub Release
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
