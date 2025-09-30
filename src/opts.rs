@@ -1,11 +1,11 @@
+use clap::Parser;
 use std::path::Path;
-use clap::{Parser};
 
 #[derive(Debug, Parser)]
 #[command(name = "rust_cli", version, author, about, long_about = None)]
 pub struct Opts {
     #[command(subcommand)]
-    pub cmd: SubCommand
+    pub cmd: SubCommand,
 }
 
 #[derive(Debug, Parser)]
@@ -19,7 +19,12 @@ pub struct CsvOpts {
     #[arg(short = 'i', long, help = "input csv file", value_parser = verify_input_file)]
     input: String,
 
-    #[arg(short = 'o', long, help = "output csv file", default_value = "assets/output.json")]
+    #[arg(
+        short = 'o',
+        long,
+        help = "output csv file",
+        default_value = "assets/output.json"
+    )]
     output: String,
 
     #[arg(short = 'd', long, help = "delimiter", default_value_t = ',')]
@@ -41,8 +46,8 @@ impl CsvOpts {
 
 fn verify_input_file(input_file_name: &str) -> Result<String, String> {
     if Path::new(input_file_name).exists() {
-         Ok(input_file_name.into())
+        Ok(input_file_name.into())
     } else {
-         Err(format!("Input file {} does not exist", input_file_name))
+        Err(format!("Input file {} does not exist", input_file_name))
     }
 }

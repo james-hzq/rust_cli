@@ -1,6 +1,6 @@
 use anyhow::Error;
 use clap::Parser;
-use rust_cli::{process_csv_to_json, Opts, SubCommand};
+use rust_cli::{Opts, SubCommand, process_csv_to_json};
 
 fn main() -> Result<(), Error> {
     let opts = Opts::parse();
