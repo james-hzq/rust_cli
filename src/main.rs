@@ -1,11 +1,15 @@
-fn main() {
-    println!("Hello, Rust!");
-}
+use anyhow::Error;
+use clap::Parser;
+use rust_cli::{Opts, SubCommand, process_csv_to_json};
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+fn main() -> Result<(), Error> {
+    let opts = Opts::parse();
+
+    match opts.cmd {
+        SubCommand::Csv(opts) => {
+            process_csv_to_json(opts.get_input(), opts.get_output())?;
+        }
     }
+
+    Ok(())
 }
